@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.33502.349
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WootchatCRM.Core", "..\WootchatCRM\WootchatCRM.Core\WootchatCRM.Core.csproj", "{4F90D1F0-0D3C-4B39-A05B-1BDF1A295AEC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WootchatCRM.Infrastructure", "..\WootchatCRM\WootchatCRM.Infrastructure\WootchatCRM.Infrastructure.csproj", "{3FB6DB13-DECA-4D83-B087-D496BD5CF330}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WootchatCRM.WinForms", "..\WootchatCRM\WootchatCRM.WinForms\WootchatCRM.WinForms.csproj", "{9F43D442-960B-4C6D-BA16-8D5EEA517E90}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4F90D1F0-0D3C-4B39-A05B-1BDF1A295AEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F90D1F0-0D3C-4B39-A05B-1BDF1A295AEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F90D1F0-0D3C-4B39-A05B-1BDF1A295AEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F90D1F0-0D3C-4B39-A05B-1BDF1A295AEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FB6DB13-DECA-4D83-B087-D496BD5CF330}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FB6DB13-DECA-4D83-B087-D496BD5CF330}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FB6DB13-DECA-4D83-B087-D496BD5CF330}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FB6DB13-DECA-4D83-B087-D496BD5CF330}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F43D442-960B-4C6D-BA16-8D5EEA517E90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F43D442-960B-4C6D-BA16-8D5EEA517E90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F43D442-960B-4C6D-BA16-8D5EEA517E90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F43D442-960B-4C6D-BA16-8D5EEA517E90}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0737A457-BB59-41D2-8424-3668E202E069}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,21 @@
+## Visual Studio / .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+
+## NuGet
+packages/
+*.nupkg
+
+## Database
+*.db
+*.sqlite
+
+## Secrets
+appsettings.Development.json
