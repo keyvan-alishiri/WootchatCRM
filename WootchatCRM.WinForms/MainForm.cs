@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using WootchatCRM.Forms.Contacts;
+using WootchatCRM.UI.Forms;
 
 namespace WootchatCRM.WinForms;
 
@@ -73,10 +74,15 @@ public partial class MainForm : Form
       LoadContent(contactListForm, "👥 مخاطبین");
    }
 
+   // ═══════════════════════════════════════════════
+   // ✅ اصلاح‌شده: لود ConversationsForm از DI Container
+   // ═══════════════════════════════════════════════
    private void btnConversations_Click(object sender, EventArgs e)
    {
       SetActiveButton(btnConversations);
-      LoadContent(new Label { Text = "💬 فرم مکالمات", Dock = DockStyle.Fill }, "💬 مکالمات");
+
+      var conversationsForm = _serviceProvider.GetRequiredService<ConversationsForm>();
+      LoadContent(conversationsForm, "💬 مکالمات");
    }
 
    private void btnCampaigns_Click(object sender, EventArgs e)
@@ -99,7 +105,7 @@ public partial class MainForm : Form
 
    private void btnSettings_Click(object sender, EventArgs e)
    {
-      SetActiveButton(btnSettings);
-      LoadContent(new Label { Text = "⚙️ تنظیمات", Dock = DockStyle.Fill }, "⚙️ تنظیمات");
+      using var settingsForm = _serviceProvider.GetRequiredService<SettingsForm>();
+      settingsForm.ShowDialog(this);
    }
 }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using WootchatCRM.Core.Entities;
 using WootchatCRM.Core.Interfaces;
 using WootchatCRM.Core.Interfaces.Services;
 using WootchatCRM.Forms.Contacts;
@@ -7,7 +8,10 @@ using WootchatCRM.Infrastructure.Chatwoot;
 using WootchatCRM.Infrastructure.Data;
 using WootchatCRM.Infrastructure.Repositories;
 using WootchatCRM.Infrastructure.Services;
+using WootchatCRM.Infrastructure.Telegram;
+using WootchatCRM.UI.Forms;
 using WootchatCRM.Windows.Forms;
+using WootchatCRM.WinForms.Contacts;
 
 namespace WootchatCRM.WinForms;
 
@@ -78,5 +82,25 @@ static class Program
       services.AddScoped<MainForm>();
       services.AddScoped<ContactListForm>();
       services.AddScoped<ContactDetailForm>();
+      services.AddTransient<SettingsForm>();
+      services.AddTransient<ConversationsForm>();
+      services.AddTransient<NewConversationForm>();
+
+      // Factory برای NewConversationForm
+      services.AddTransient<Func<Contact, NewConversationForm>>(sp => contact =>
+      {
+         var chatwootService = sp.GetRequiredService<IChatwootApiClient>();
+         var settingsService = sp.GetRequiredService<ISettingsService>();
+         var serviceProvider = sp.GetRequiredService<IServiceProvider>();
+         var telegramService = sp.GetService<ITelegramClientService>();
+
+         return new NewConversationForm(
+             contact,
+             chatwootService,
+             settingsService,
+             serviceProvider,
+             telegramService);
+      });
+
    }
 }

@@ -158,4 +158,21 @@ public interface IChatwootApiClient
    /// اضافه کردن برچسب به مکالمه
    /// </summary>
    Task<ChatwootApiResult<bool>> AddLabelsToConversationAsync(int conversationId, List<string> labels);
+
+   // ═══════════════════════════════════════════════════════════════
+   // Contact Inboxes
+   // ═══════════════════════════════════════════════════════════════
+
+   /// <summary>
+   /// اتصال Contact به Inbox
+   /// </summary>
+   Task<ChatwootApiResult<ChatwootContactInbox>> CreateContactInboxAsync(int contactId, int inboxId);
+
+   /// <summary>
+   /// دریافت لیست Inbox های یک Contact
+   /// </summary>
+   Task<ChatwootApiResult<List<ChatwootContactInbox>>> GetContactInboxesAsync(int contactId);
+
+
+
 }

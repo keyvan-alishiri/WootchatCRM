@@ -257,8 +257,111 @@ public class ChatwootApiClient : IChatwootApiClient
 
    public async Task<ChatwootApiResult<ChatwootContact>> CreateContactAsync(ChatwootContactCreateRequest request)
    {
-      return await PostAsync<ChatwootContact>("contacts", request);
+	  return await PostAsync<ChatwootContact>("contacts", request);
    }
+   //public async Task<ChatwootApiResult<ChatwootContact>> CreateContactAsync(ChatwootContactCreateRequest request)
+   //{
+   //   try
+   //   {
+   //      // ساخت آبجکت با نام‌های snake_case برای Chatwoot API
+   //      var requestObj = new Dictionary<string, object?>
+   //      {
+   //         ["inbox_id"] = request.InboxId,
+   //         ["name"] = request.Name
+   //      };
+
+   //      // فقط اگر مقدار داشت اضافه کن
+   //      if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+   //         requestObj["phone_number"] = request.PhoneNumber;
+
+   //      if (!string.IsNullOrWhiteSpace(request.Email))
+   //         requestObj["email"] = request.Email;
+
+   //      var json = JsonSerializer.Serialize(requestObj);
+
+   //      // 🔴 DEBUG
+   //      System.Diagnostics.Debug.WriteLine($"=== CREATE CONTACT REQUEST ===");
+   //      System.Diagnostics.Debug.WriteLine($"URL: api/v1/accounts/{_accountId}/contacts");
+   //      System.Diagnostics.Debug.WriteLine($"JSON: {json}");
+
+   //      var content = new StringContent(json, Encoding.UTF8, "application/json");
+   //      var response = await _httpClient.PostAsync($"api/v1/accounts/{_accountId}/contacts", content);
+
+   //      var responseBody = await response.Content.ReadAsStringAsync();
+   //      System.Diagnostics.Debug.WriteLine($"=== RESPONSE BODY ===");
+   //      System.Diagnostics.Debug.WriteLine(responseBody);
+
+   //      // 🔴 DEBUG
+   //      System.Diagnostics.Debug.WriteLine($"=== CREATE CONTACT RESPONSE ===");
+   //      System.Diagnostics.Debug.WriteLine($"Status: {response.StatusCode}");
+   //      System.Diagnostics.Debug.WriteLine($"Body: {responseBody}");
+
+   //      // ❌ خطا
+   //      if (!response.IsSuccessStatusCode)
+   //      {
+   //         return new ChatwootApiResult<ChatwootContact>
+   //         {
+   //            IsSuccess = false,
+   //            ErrorMessage = $"Status: {response.StatusCode}, Body: {responseBody}",
+   //            StatusCode = (int)response.StatusCode,
+   //            Data = null
+   //         };
+   //      }
+
+   //      // ✅ موفق - parse پاسخ
+   //      var options = new JsonSerializerOptions
+   //      {
+   //         PropertyNameCaseInsensitive = true
+   //      };
+
+   //      var contact = JsonSerializer.Deserialize<ChatwootContact>(responseBody, options);
+
+   //      return new ChatwootApiResult<ChatwootContact>
+   //      {
+   //         IsSuccess = true,
+   //         Data = contact,
+   //         StatusCode = (int)response.StatusCode,
+   //         ErrorMessage = null
+   //      };
+   //   }
+   //   catch (HttpRequestException ex)
+   //   {
+   //      System.Diagnostics.Debug.WriteLine($"=== HTTP EXCEPTION: {ex.Message} ===");
+
+   //      return new ChatwootApiResult<ChatwootContact>
+   //      {
+   //         IsSuccess = false,
+   //         ErrorMessage = $"خطای شبکه: {ex.Message}",
+   //         StatusCode = 0,
+   //         Data = null
+   //      };
+   //   }
+   //   catch (JsonException ex)
+   //   {
+   //      System.Diagnostics.Debug.WriteLine($"=== JSON EXCEPTION: {ex.Message} ===");
+
+   //      return new ChatwootApiResult<ChatwootContact>
+   //      {
+   //         IsSuccess = false,
+   //         ErrorMessage = $"خطای پردازش JSON: {ex.Message}",
+   //         StatusCode = 0,
+   //         Data = null
+   //      };
+   //   }
+   //   catch (Exception ex)
+   //   {
+   //      System.Diagnostics.Debug.WriteLine($"=== EXCEPTION: {ex.Message} ===");
+
+   //      return new ChatwootApiResult<ChatwootContact>
+   //      {
+   //         IsSuccess = false,
+   //         ErrorMessage = $"خطا: {ex.Message}",
+   //         StatusCode = 0,
+   //         Data = null
+   //      };
+   //   }
+   //}
+
 
    public async Task<ChatwootApiResult<ChatwootContact>> UpdateContactAsync(int contactId, ChatwootContactUpdateRequest request)
    {
@@ -277,26 +380,77 @@ public class ChatwootApiClient : IChatwootApiClient
          await EnsureConfiguredAsync();
 
          var encodedPhone = Uri.EscapeDataString(phoneNumber);
-         var response = await _httpClient.GetAsync(BuildUrl($"contacts/search?q={encodedPhone}"));
+
+         System.Diagnostics.Debug.WriteLine("========== SEARCH DEBUG ==========");
+         System.Diagnostics.Debug.WriteLine($"Input phoneNumber: [{phoneNumber}]");
+         System.Diagnostics.Debug.WriteLine($"Encoded phone: [{encodedPhone}]");
+
+         var url = BuildUrl($"contacts/search?q={encodedPhone}");
+         System.Diagnostics.Debug.WriteLine($"Full URL: [{url}]");
+
+         var response = await _httpClient.GetAsync(url);
+
+         System.Diagnostics.Debug.WriteLine($"Response Status: {response.StatusCode}");
+
+         var responseContent = await response.Content.ReadAsStringAsync();
+         System.Diagnostics.Debug.WriteLine($"Response Body: {responseContent}");
+
          var result = await HandleResponseAsync<ChatwootContactSearchResponse>(response);
+
+         System.Diagnostics.Debug.WriteLine($"HandleResponse IsSuccess: {result.IsSuccess}");
+         System.Diagnostics.Debug.WriteLine($"Payload is null: {result.Data?.Payload == null}");
+         System.Diagnostics.Debug.WriteLine($"Payload count: {result.Data?.Payload?.Count ?? -1}");
 
          if (result.IsSuccess && result.Data?.Payload != null && result.Data.Payload.Count > 0)
          {
-            var contact = result.Data.Payload.FirstOrDefault(c =>
-                c.PhoneNumber != null &&
-                c.PhoneNumber.Replace(" ", "").Replace("-", "").Contains(
-                    phoneNumber.Replace(" ", "").Replace("-", "")));
+            System.Diagnostics.Debug.WriteLine("--- Found contacts in payload ---");
+
+            foreach (var c in result.Data.Payload)
+            {
+               System.Diagnostics.Debug.WriteLine($"  Contact ID: {c.Id}, Phone: [{c.PhoneNumber}], Name: {c.Name}");
+            }
+
+            // ✅ ساده‌ترین روش: اولین نتیجه را برگردان
+            var contact = result.Data.Payload.First();
+            System.Diagnostics.Debug.WriteLine($"Returning contact ID: {contact.Id}");
 
             return ChatwootApiResult<ChatwootContact?>.Success(contact);
          }
 
+         System.Diagnostics.Debug.WriteLine("No contacts found in payload");
          return ChatwootApiResult<ChatwootContact?>.Success(null);
       }
       catch (Exception ex)
       {
+         System.Diagnostics.Debug.WriteLine($"EXCEPTION: {ex.Message}");
+         System.Diagnostics.Debug.WriteLine($"Stack: {ex.StackTrace}");
          return ChatwootApiResult<ChatwootContact?>.Failure($"Search failed: {ex.Message}");
       }
    }
+
+
+   /// <summary>
+   /// نرمال‌سازی شماره تلفن - فقط ارقام آخر را نگه می‌دارد
+   /// </summary>
+   private static string NormalizePhoneNumber(string phone)
+   {
+      if (string.IsNullOrWhiteSpace(phone))
+         return string.Empty;
+
+      // حذف همه کاراکترها به جز ارقام
+      var digitsOnly = new string(phone.Where(char.IsDigit).ToArray());
+
+      // اگر با 98 شروع می‌شود و بیش از 10 رقم دارد، 98 را حذف کن
+      if (digitsOnly.StartsWith("98") && digitsOnly.Length > 10)
+         digitsOnly = digitsOnly.Substring(2);
+
+      // اگر با 0 شروع می‌شود، حذفش کن
+      if (digitsOnly.StartsWith("0"))
+         digitsOnly = digitsOnly.Substring(1);
+
+      return digitsOnly;
+   }
+
 
    public async Task<ChatwootApiResult<ChatwootContact?>> SearchContactByEmailAsync(string email)
    {
@@ -498,4 +652,59 @@ public class ChatwootApiClient : IChatwootApiClient
 
       return ChatwootApiResult<bool>.Failure(result.ErrorMessage!, result.StatusCode);
    }
+
+
+   #region Contact Inboxes
+
+   public async Task<ChatwootApiResult<ChatwootContactInbox>> CreateContactInboxAsync(int contactId, int inboxId)
+   {
+      var request = new ChatwootContactInboxCreateRequest
+      {
+         InboxId = inboxId
+      };
+
+      var result = await PostAsync<ChatwootContactInbox>(
+          $"contacts/{contactId}/contact_inboxes",
+          request);
+
+      if (result.IsSuccess && result.Data != null)
+         return ChatwootApiResult<ChatwootContactInbox>.Success(result.Data);
+
+      // اگر از قبل وجود دارد (422 = Unprocessable Entity)، سعی کن پیدا کنش
+      if (result.StatusCode == 422)
+      {
+         var existingResult = await GetContactInboxesAsync(contactId);
+         if (existingResult.IsSuccess && existingResult.Data != null)
+         {
+            var existing = existingResult.Data.FirstOrDefault(ci => ci.InboxId == inboxId);
+            if (existing != null)
+               return ChatwootApiResult<ChatwootContactInbox>.Success(existing);
+         }
+      }
+
+      return ChatwootApiResult<ChatwootContactInbox>.Failure(
+          result.ErrorMessage ?? "Failed to create contact inbox",
+          result.StatusCode);
+   }
+
+   public async Task<ChatwootApiResult<List<ChatwootContactInbox>>> GetContactInboxesAsync(int contactId)
+   {
+      var result = await GetAsync<ChatwootContactInboxListResponse>(
+          $"contacts/{contactId}/contact_inboxes");
+
+      if (result.IsSuccess && result.Data?.Payload != null)
+         return ChatwootApiResult<List<ChatwootContactInbox>>.Success(result.Data.Payload);
+
+      if (result.IsSuccess)
+         return ChatwootApiResult<List<ChatwootContactInbox>>.Success(new List<ChatwootContactInbox>());
+
+      return ChatwootApiResult<List<ChatwootContactInbox>>.Failure(
+          result.ErrorMessage!,
+          result.StatusCode);
+   }
+
+   #endregion
+
+
+
 }

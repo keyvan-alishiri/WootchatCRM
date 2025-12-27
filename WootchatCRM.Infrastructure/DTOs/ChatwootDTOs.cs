@@ -80,6 +80,54 @@ public class ChatwootInbox
    public string? WidgetColor { get; set; }
 }
 
+
+#region Contact Inbox
+
+/// <summary>
+/// ارتباط Contact با Inbox در Chatwoot
+/// </summary>
+public class ChatwootContactInbox
+{
+   [JsonPropertyName("id")]
+   public int Id { get; set; }
+
+   [JsonPropertyName("contact_id")]
+   public int ContactId { get; set; }
+
+   [JsonPropertyName("inbox_id")]
+   public int InboxId { get; set; }
+
+   [JsonPropertyName("source_id")]
+   public string? SourceId { get; set; }
+
+   [JsonPropertyName("created_at")]
+   public string? CreatedAt { get; set; }
+
+   [JsonPropertyName("updated_at")]
+   public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// درخواست ایجاد Contact Inbox
+/// </summary>
+public class ChatwootContactInboxCreateRequest
+{
+   [JsonPropertyName("inbox_id")]
+   public int InboxId { get; set; }
+}
+
+/// <summary>
+/// پاسخ لیست Contact Inbox
+/// </summary>
+public class ChatwootContactInboxListResponse
+{
+   [JsonPropertyName("payload")]
+   public List<ChatwootContactInbox> Payload { get; set; } = new();
+}
+
+#endregion
+
+
 /// <summary>
 /// پاسخ لیست Inbox
 /// </summary>
@@ -285,6 +333,9 @@ public class ChatwootConversationCreateRequest
    [JsonPropertyName("contact_id")]
    public int ContactId { get; set; }
 
+   [JsonPropertyName("source_id")]
+   public string? SourceId { get; set; }  // 🆕 اضافه شد
+
    [JsonPropertyName("status")]
    public string Status { get; set; } = "open";
 
@@ -297,6 +348,7 @@ public class ChatwootConversationCreateRequest
    [JsonPropertyName("message")]
    public ChatwootInitialMessage? Message { get; set; }
 }
+
 
 public class ChatwootInitialMessage
 {

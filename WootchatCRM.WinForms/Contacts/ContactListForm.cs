@@ -1,5 +1,7 @@
-﻿using WootchatCRM.Core.Interfaces.Services;
+﻿using WootchatCRM.Core.Entities;
+using WootchatCRM.Core.Interfaces.Services;
 using WootchatCRM.Windows.Forms;
+using WootchatCRM.WinForms.Contacts;
 
 namespace WootchatCRM.Forms.Contacts
 {
@@ -8,17 +10,20 @@ namespace WootchatCRM.Forms.Contacts
       private readonly IContactService _contactService;
       private readonly ITagService _tagService;
       private readonly IServiceProvider _serviceProvider;
+      private readonly Func<Contact, NewConversationForm> _conversationFormFactory;
 
       public ContactListForm(
-          IContactService contactService,
-          ITagService tagService,
-          IServiceProvider serviceProvider)
+     IContactService contactService,
+     ITagService tagService,
+     IServiceProvider serviceProvider,
+     Func<Contact, NewConversationForm> conversationFormFactory)
       {
          InitializeComponent();
 
          _contactService = contactService;
          _tagService = tagService;
          _serviceProvider = serviceProvider;
+         _conversationFormFactory = conversationFormFactory;
 
          // رویدادها
          this.Load += ContactListForm_Load;
@@ -28,9 +33,11 @@ namespace WootchatCRM.Forms.Contacts
          this.btnRefresh.Click += btnRefresh_Click;
          this.btnSearch.Click += btnSearch_Click;
          this.btnClearSearch.Click += btnClearSearch_Click;
+         this.btnSendMessage.Click += btnSendMessage_Click;
          this.txtSearch.KeyDown += txtSearch_KeyDown;
          this.dgvContacts.CellDoubleClick += dgvContacts_CellDoubleClick;
       }
+
 
       #region Load & Refresh
 
@@ -109,12 +116,14 @@ namespace WootchatCRM.Forms.Contacts
          if (dgvContacts.CurrentRow == null)
             return null;
 
-         var value = dgvContacts.CurrentRow.Cells["Id"].Value;
+         var value = dgvContacts.CurrentRow.Cells["colId"].Value;
+
          if (value == null)
             return null;
 
          return Convert.ToInt32(value);
       }
+
 
       private void OpenDetailForm(int? contactId)
       {
@@ -174,6 +183,92 @@ namespace WootchatCRM.Forms.Contacts
       {
          txtSearch.Clear();
          await LoadContactsAsync();
+      }
+      private async void btnSendMessage_Click(object sender, EventArgs e)
+      {
+         // Debug
+         if (dgvContacts.CurrentRow == null)
+         {
+            MessageBox.Show("CurrentRow is NULL");
+            return;
+         }
+
+         MessageBox.Show($"RowIndex: {dgvContacts.CurrentRow.Index}");
+
+         if (!dgvContacts.Columns.Contains("colId"))
+         {
+            MessageBox.Show("Column 'colId' not found!");
+            return;
+         }
+
+         var cell = dgvContacts.CurrentRow.Cells["colId"];
+         MessageBox.Show($"Cell is null: {cell == null}");
+
+         if (cell != null)
+         {
+            MessageBox.Show($"Cell Value: {cell.Value ?? "NULL"}");
+         }
+
+         // ادامه کد اصلی
+         var id = GetSelectedContactId();
+         if (id == null)
+         {
+            MessageBox.Show(
+                "لطفاً یک مخاطب انتخاب کنید.",
+                "هشدار",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return;
+         }
+
+         await OpenNewConversationFormAsync(id.Value);
+      }
+
+
+      private async Task OpenNewConversationFormAsync(int contactId)
+      {
+         try
+         {
+            lblStatus.Text = "در حال بارگذاری...";
+
+            var contact = await _contactService.GetByIdAsync(contactId);
+
+            if (contact == null)
+            {
+               MessageBox.Show(
+                   "مخاطب یافت نشد.",
+                   "خطا",
+                   MessageBoxButtons.OK,
+                   MessageBoxIcon.Error);
+               lblStatus.Text = "آماده";
+               return;
+            }
+
+            if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
+            {
+               MessageBox.Show(
+                   "این مخاطب شماره تلفن ندارد.\nبرای ارسال پیام، ابتدا شماره تلفن را وارد کنید.",
+                   "هشدار",
+                   MessageBoxButtons.OK,
+                   MessageBoxIcon.Warning);
+               lblStatus.Text = "آماده";
+               return;
+            }
+
+            lblStatus.Text = "آماده";
+
+            using var form = _conversationFormFactory(contact);
+            form.ShowDialog();
+         }
+         catch (Exception ex)
+         {
+            lblStatus.Text = "خطا";
+            MessageBox.Show(
+                $"خطا در باز کردن فرم ارسال پیام:\n{ex.Message}",
+                "خطا",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+         }
       }
 
       private async void txtSearch_KeyDown(object sender, KeyEventArgs e)
